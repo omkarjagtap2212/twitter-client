@@ -12,40 +12,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resolvers = void 0;
-const axios_1 = __importDefault(require("axios"));
+exports.resolvers = exports.extraResolvers = void 0;
 const db_1 = require("../../client/db");
-const jwt_1 = __importDefault(require("../../services/jwt"));
+const user_1 = __importDefault(require("../../services/user"));
+// import JWT
 const queries = {
     verfiyGoogleToken: (parent, { token }) => __awaiter(void 0, void 0, void 0, function* () {
         //    / return token
-        const googleToken = token;
-        const GoogleOauthURL = new URL("https://oauth2.googleapis.com/tokeninfo");
-        GoogleOauthURL.searchParams.set("id_token", googleToken);
-        const { data } = yield axios_1.default.get(GoogleOauthURL.toString(), {
-            responseType: "json"
-        });
-        const user = yield db_1.prismaClient.user.findUnique({
-            where: { email: data.email },
-        });
-        if (!user) {
-            yield db_1.prismaClient.user.create({
-                data: {
-                    email: data.email,
-                    firstName: data.given_name,
-                    lastName: data.family_name,
-                    profileImage: data.picture,
-                },
-            });
-        }
-        const userInDb = yield db_1.prismaClient.user.findUnique({
-            where: { email: data.email }
-        });
-        if (!userInDb)
-            throw new Error("user not found");
-        const userToken = jwt_1.default.generateTokenForUser(userInDb);
-        return userToken;
-        //    return "your are succesfully created JWT authentiactions"
+        const resultToken = yield user_1.default.verifyGoogleAuthToken(token);
+        return resultToken;
     }),
     getCurrentUser: (parent, args, ctx) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
@@ -53,8 +28,14 @@ const queries = {
         const id = (_a = ctx.user) === null || _a === void 0 ? void 0 : _a.id;
         if (!id)
             return null;
-        const user = yield db_1.prismaClient.user.findUnique({ where: { id } });
+        const user = yield user_1.default.getUserById(id);
         return user;
-    })
+    }),
+    getUserById: (parent, { id }, ctx) => __awaiter(void 0, void 0, void 0, function* () { return user_1.default.getUserById(id); })
 };
-exports.resolvers = { queries };
+exports.extraResolvers = {
+    User: {
+        tweets: (parent) => db_1.prismaClient.tweet.findMany({ where: { author: { id: parent.id } } })
+    }
+};
+exports.resolvers = { queries, extraResolvers: exports.extraResolvers };

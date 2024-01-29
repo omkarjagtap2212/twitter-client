@@ -3,10 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.queries = void 0;
 exports.queries = `#graphql
 
-verfiyGoogleToken(token:String!):String
-getCurrentUser:User
+getAllTweets:[Tweet]
+getSignedURLForTweet(imageName:String!,imageType:String!):String
 
-getUserById(id:ID!):User
 
 
 `;
