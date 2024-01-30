@@ -40,7 +40,7 @@ const dotenv = __importStar(require("dotenv"));
 const app_1 = require("./app");
 const cors_1 = __importDefault(require("cors"));
 dotenv.config();
-// console.log(process.env)
+console.log(process.env);
 const init = () => __awaiter(void 0, void 0, void 0, function* () {
     const app = yield (0, app_1.initServer)();
     app.use((0, cors_1.default)());

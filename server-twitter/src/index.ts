@@ -4,7 +4,7 @@ import { initServer } from "./app";
 import cors from 'cors';
 
 dotenv.config()
-// console.log(process.env)
+console.log(process.env)
 
 const init=async()=>{
     const app=await initServer()

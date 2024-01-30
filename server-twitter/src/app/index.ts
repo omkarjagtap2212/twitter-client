@@ -7,6 +7,7 @@ import { Tweet } from "./tweet";
 import cors from 'cors';
 import { GraphqlContext } from "../interfaces";
 import JWTService from "../services/jwt";
+// import { User } from './user/index';
 
 export const initServer = async () => {
 
@@ -22,6 +23,7 @@ export const initServer = async () => {
         typeDefs: `
         ${User.types}
         ${Tweet.types}
+      
 
 
         type  Query {
@@ -32,6 +34,7 @@ export const initServer = async () => {
         }
         type Mutation{
             ${Tweet.mutations}
+            ${User.mutations}
         }
       
         `,
@@ -44,7 +47,8 @@ export const initServer = async () => {
             },
         
             Mutation: {
-                ...Tweet.resolvers.muatations
+                ...Tweet.resolvers.muatations,
+                ...User.resolvers.mutations
             },
             ...Tweet.resolvers.extraResolvers,
             ...User.resolvers.extraResolvers,

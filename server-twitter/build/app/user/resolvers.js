@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.resolvers = exports.extraResolvers = void 0;
 const db_1 = require("../../client/db");
 const user_1 = __importDefault(require("../../services/user"));
+// import { mutations } from './mutation';
 // import JWT
 const queries = {
     verfiyGoogleToken: (parent, { token }) => __awaiter(void 0, void 0, void 0, function* () {
@@ -35,7 +36,41 @@ const queries = {
 };
 exports.extraResolvers = {
     User: {
-        tweets: (parent) => db_1.prismaClient.tweet.findMany({ where: { author: { id: parent.id } } })
+        tweets: (parent) => db_1.prismaClient.tweet.findMany({ where: { author: { id: parent.id } } }),
+        followers: (parent) => __awaiter(void 0, void 0, void 0, function* () {
+            const result = yield db_1.prismaClient.follows.findMany({
+                where: { following: { id: parent.id } },
+                include: {
+                    follower: true,
+                }
+            });
+            return result.map((el) => el.follower);
+        }),
+        following: (parent) => __awaiter(void 0, void 0, void 0, function* () {
+            const result = yield db_1.prismaClient.follows.findMany({
+                where: { follower: { id: parent.id } },
+                include: {
+                    following: true,
+                }
+            });
+            // console.log(result)
+            // return
+            return result.map((el) => el.following);
+        })
     }
 };
-exports.resolvers = { queries, extraResolvers: exports.extraResolvers };
+const mutations = {
+    followUser: (parent, { to }, ctx) => __awaiter(void 0, void 0, void 0, function* () {
+        if (!ctx.user || !ctx.user.id)
+            throw new Error("unaunthicated..");
+        yield user_1.default.followUser(ctx.user.id, to);
+        return true;
+    }),
+    unfollowUser: (parent, { to }, ctx) => __awaiter(void 0, void 0, void 0, function* () {
+        if (!ctx.user || !ctx.user.id)
+            throw new Error("unaunthicated..");
+        yield user_1.default.unfollowUser(ctx.user.id, to);
+        return true;
+    })
+};
+exports.resolvers = { queries, extraResolvers: exports.extraResolvers, mutations };

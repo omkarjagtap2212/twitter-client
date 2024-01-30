@@ -6,6 +6,10 @@ type User{
     lastName:String
     email:String!
     profileImage:String
+    
+    followers:[User]
+    following:[User]
+
 
     tweets:[Tweet]
 }
